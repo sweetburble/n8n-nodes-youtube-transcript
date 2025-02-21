@@ -1,59 +1,61 @@
 {
-  "name": "n8n-nodes-youtube-transcript",
-  "version": "0.9.0",
-  "description": "download transcript of youtube videos in your n8n workflows",
-  "keywords": [
-    "n8n-community-node-package",
-    "n8n",
-    "youtube",
-    "transcript",
-    "youtube-transcript"
-  ],
-  "license": "MIT",
-  "homepage": "",
-  "author": {
-    "name": "Franz Haberfellner",
-    "email": "haf68k@gmail.com"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/hapheus/n8n-nodes-youtube-transcript.git"
-  },
-  "main": "index.js",
-  "scripts": {
-    "preinstall": "npx only-allow pnpm",
-    "build": "tsc && gulp build:icons",
-    "dev": "tsc --watch",
-    "format": "prettier nodes --write",
-    "lint": "eslint nodes package.json",
-    "lintfix": "eslint nodes package.json --fix",
-    "prepublishOnly": "pnpm build && pnpm lint -c .eslintrc.prepublish.js nodes package.json"
-  },
-  "files": [
-    "dist"
-  ],
-  "n8n": {
-    "n8nNodesApiVersion": 1,
-    "credentials": [],
-    "nodes": [
-      "dist/nodes/YoutubeTranscriptNode/YoutubeTranscriptNode.node.js"
-    ]
-  },
-  "devDependencies": {
-    "@typescript-eslint/parser": "^7.15.0",
-    "eslint": "^8.56.0",
-    "eslint-plugin-n8n-nodes-base": "^1.16.1",
-    "gulp": "^4.0.2",
-    "n8n-workflow": "*",
-    "prettier": "^3.3.2",
-    "typescript": "^5.5.3"
-  },
-  "peerDependencies": {
-    "n8n-workflow": "*"
-  },
-  "dependencies": {
-    "puppeteer": "^23.6.0",
-    "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2"
-  }
+	"name": "n8n-nodes-youtube-transcript",
+	"version": "0.1.0",
+	"description": "download transcript of youtube videos in your n8n workflows",
+	"keywords": [
+		"n8n-community-node-package",
+		"n8n",
+		"youtube",
+		"transcript",
+		"youtube-transcript"
+	],
+	"license": "MIT",
+	"homepage": "",
+	"author": {
+		"name": "Franz Haberfellner",
+		"email": "haf68k@gmail.com"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/hapheus/n8n-nodes-youtube-transcript.git"
+	},
+	"main": "index.js",
+	"engines": {
+		"node": ">=18.10",
+		"pnpm": ">=9.1"
+	},
+	"scripts": {
+		"preinstall": "npx only-allow pnpm",
+		"build": "tsc && gulp build:icons",
+		"dev": "tsc --watch",
+		"format": "prettier nodes credentials --write",
+		"lint": "eslint nodes credentials package.json",
+		"lintfix": "eslint nodes credentials package.json --fix",
+		"prepublishOnly": "pnpm build && pnpm lint -c .eslintrc.prepublish.js nodes credentials package.json"
+	},
+	"files": [
+		"dist"
+	],
+	"n8n": {
+		"n8nNodesApiVersion": 1,
+		"credentials": [
+			"dist/credentials/ExampleCredentialsApi.credentials.js",
+			"dist/credentials/HttpBinApi.credentials.js"
+		],
+		"nodes": [
+			"dist/nodes/ExampleNode/ExampleNode.node.js",
+			"dist/nodes/HttpBin/HttpBin.node.js"
+		]
+	},
+	"devDependencies": {
+		"@typescript-eslint/parser": "^7.15.0",
+		"eslint": "^8.56.0",
+		"eslint-plugin-n8n-nodes-base": "^1.16.1",
+		"gulp": "^4.0.2",
+		"prettier": "^3.3.2",
+		"typescript": "^5.5.3"
+	},
+	"dependencies": {
+		"youtube-transcript": "^1.2.1"
+	}
 }

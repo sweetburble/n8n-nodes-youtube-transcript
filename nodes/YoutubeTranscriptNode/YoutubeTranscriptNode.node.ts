@@ -6,9 +6,7 @@ import {
 	INodeTypeDescription,
 	NodeOperationError,
 } from 'n8n-workflow';
-import puppeteer from 'puppeteer-extra';
-import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-import { Browser, Page } from 'puppeteer';
+import { YoutubeTranscript } from 'youtube-transcript';
 
 export class YoutubeTranscriptNode implements INodeType {
 	description: INodeTypeDescription = {
@@ -36,82 +34,10 @@ export class YoutubeTranscriptNode implements INodeType {
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-		puppeteer.use(StealthPlugin());
-		const checkBrowserWorks = async function () {
-			let browser: Browser | null = null;
-			try {
-				browser = await puppeteer.launch({
-					headless: true,
-					args: [
-        		'--ignore-certificate-errors',
-        		'--no-sandbox',
-        		'--disable-setuid-sandbox',
-        		'--disable-accelerated-2d-canvas',
-        		'--disable-gpu'
-    			],
-					ignoreDefaultArgs: ['--enable-automation'],
-				});
-			} catch (error) {
-				throw new ApplicationError(`Failed to launch the browser: ${error.message}`);
-			} finally {
-				if (browser) await browser.close();
-			}
-		};
-
 		const getTranscriptFromYoutube = async function (youtubeId: string) {
-			let browser: Browser | null = null;
-			let page: Page | null = null;
 			try {
-				browser = await puppeteer.launch({
-					headless: true,
-					args: [
-        		'--ignore-certificate-errors',
-        		'--no-sandbox',
-        		'--disable-setuid-sandbox',
-        		'--disable-accelerated-2d-canvas',
-        		'--disable-gpu'
-    			],
-					ignoreDefaultArgs: ['--enable-automation'],
-				});
-
-				page = await browser.newPage();
-
 				const url = `https://www.youtube.com/watch?v=${youtubeId}`;
-				await page.goto(url, { waitUntil: 'domcontentloaded' });
-
-				await page.evaluate(() => {
-					const cookieButton = document.querySelector<HTMLButtonElement>(
-						'button[aria-label*="cookie"], button[aria-label*="cookies"]',
-					);
-					cookieButton?.click();
-				});
-
-				const transcriptButtonAvailable = await page
-					.waitForSelector('ytd-video-description-transcript-section-renderer button', {
-						timeout: 10_000,
-					})
-					.catch(() => null);
-
-				if (!transcriptButtonAvailable) {
-					throw new ApplicationError(
-						`The video with ID ${youtubeId} either does not exist or does not have a transcript available. Please check the video URL or try again later.`,
-					);
-				}
-
-				await page.evaluate(() => {
-					const transcriptButton = document.querySelector<HTMLButtonElement>(
-						'ytd-video-description-transcript-section-renderer button',
-					);
-					transcriptButton?.click();
-				});
-
-				await page.waitForSelector('#segments-container', { timeout: 10_000 });
-
-				const transcript = await page.evaluate(() => {
-					return Array.from(document.querySelectorAll('#segments-container yt-formatted-string'))
-						.map((element) => element.textContent?.trim() || '')
-						.filter((text) => text !== '');
-				});
+				const transcript = await YoutubeTranscript.fetchTranscript(url);
 
 				return transcript;
 			} catch (error) {
@@ -120,19 +46,8 @@ export class YoutubeTranscriptNode implements INodeType {
 				} else {
 					throw new ApplicationError(`Failed to extract transcript: ${error.message}`);
 				}
-			} finally {
-				if (page) await page.close();
-				if (browser) await browser.close();
 			}
 		};
-
-		try {
-			await checkBrowserWorks();
-		} catch (error) {
-			throw new NodeOperationError(this.getNode(), error, {
-				message: 'Failed to launch the browser before processing.',
-			});
-		}
 
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
