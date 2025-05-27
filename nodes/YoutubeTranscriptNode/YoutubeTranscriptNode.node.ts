@@ -79,13 +79,19 @@ export class YoutubeTranscriptNode implements INodeType {
 				const transcript = await getTranscriptFromYoutube(youtubeId);
 
 				let text = '';
-				for (const line of transcript) {
-					text += line + ' ';
+				// transcript가 존재하고 배열인 경우에만 반복문 실행
+				if (transcript && Array.isArray(transcript)) {
+					for (const line of transcript) {
+						// 각 line 객체에 text 속성이 있는지 확인하고, text 속성을 사용
+						if (line && typeof line.text === 'string') {
+							text += line.text + ' ';
+						}
+					}
 				}
 				returnData.push({
 					json: {
 						youtubeId: youtubeId,
-						text: text,
+						text: text.trim(), // 마지막 공백 제거
 					},
 					pairedItem: { item: itemIndex },
 				});
