@@ -8,6 +8,7 @@ import {
 	NodeOperationError,
 } from 'n8n-workflow';
 import { YoutubeTranscript } from 'youtube-transcript';
+import { Client as YoutubeiClient } from 'youtubei';
 
 export class YoutubeTranscriptNode implements INodeType {
 	description: INodeTypeDescription = {
@@ -31,6 +32,24 @@ export class YoutubeTranscriptNode implements INodeType {
 				default: '',
 				placeholder: 'Youtube Video ID or Url',
 			},
+			{
+				displayName: 'Return Channel ID',
+				name: 'returnChannelId',
+				type: 'boolean',
+				default: false,
+			},
+			{
+				displayName: 'Return Channel Name',
+				name: 'returnChannelName',
+				type: 'boolean',
+				default: false,
+			},
+			{
+				displayName: 'Return Title',
+				name: 'returnTitle',
+				type: 'boolean',
+				default: false,
+			},
 		],
 	};
 
@@ -53,12 +72,22 @@ export class YoutubeTranscriptNode implements INodeType {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
 
-		let youtubeId: string;
-
 		for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
 			try {
-				youtubeId = this.getNodeParameter('youtubeId', itemIndex, '') as string;
+				const youtubeIdOrUrl = this.getNodeParameter('youtubeId', itemIndex, '') as string;
+				const returnChannelId = this.getNodeParameter(
+					'returnChannelId',
+					itemIndex,
+					false,
+				) as boolean;
+				const returnChannelName = this.getNodeParameter(
+					'returnChannelName',
+					itemIndex,
+					false,
+				) as boolean;
+				const returnTitle = this.getNodeParameter('returnTitle', itemIndex, false) as boolean;
 
+				let youtubeId = youtubeIdOrUrl;
 				const urlRegex = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/;
 
 				if (urlRegex.test(youtubeId)) {
@@ -80,20 +109,34 @@ export class YoutubeTranscriptNode implements INodeType {
 				const transcript = await getTranscriptFromYoutube(youtubeId);
 
 				let text = '';
-				// transcript가 존재하고 배열인 경우에만 반복문 실행
 				if (transcript && Array.isArray(transcript)) {
 					for (const line of transcript) {
-						// 각 line 객체에 text 속성이 있는지 확인하고, text 속성을 사용
 						if (line && typeof line.text === 'string') {
 							text += line.text + ' ';
 						}
 					}
 				}
+
+				const output: { [key: string]: any } = {
+					youtubeId: youtubeId,
+					transcript: text.trim(),
+				};
+
+				if (returnChannelId || returnChannelName || returnTitle) {
+					const youtubei = new YoutubeiClient();
+					const videoInfo = await youtubei.getVideo(youtubeId);
+					if (!videoInfo) {
+						throw new NodeOperationError(this.getNode(), 'Failed to retrieve video information', {
+							itemIndex,
+						});
+					}
+					if (returnChannelId) output.channelId = videoInfo.channel?.id;
+					if (returnChannelName) output.channelName = videoInfo.channel?.name;
+					if (returnTitle) output.title = videoInfo.title;
+				}
+
 				returnData.push({
-					json: {
-						youtubeId: youtubeId,
-						text: text.trim(), // 마지막 공백 제거
-					},
+					json: output,
 					pairedItem: { item: itemIndex },
 				});
 			} catch (error) {

@@ -60,13 +60,14 @@
 		"eslint": "^9.27.0",
 		"eslint-plugin-n8n-nodes-base": "^1.16.1",
 		"gulp": "^4.0.2",
+		"n8n-core": "^1.14.1",
+		"n8n-workflow": "^1.82.0",
 		"prettier": "^3.3.2",
 		"typescript": "^5.5.3",
-		"typescript-eslint": "^8.32.1",
-		"n8n-core": "^1.14.1",
-		"n8n-workflow": "^1.82.0"
+		"typescript-eslint": "^8.32.1"
 	},
 	"dependencies": {
-		"youtube-transcript": "^1.2.1"
+		"youtube-transcript": "^1.2.1",
+		"youtubei": "^1.6.7"
 	}
 }
