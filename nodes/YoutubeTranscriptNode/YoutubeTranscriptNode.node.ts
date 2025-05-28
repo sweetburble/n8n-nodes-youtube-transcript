@@ -61,11 +61,9 @@ export class YoutubeTranscriptNode implements INodeType {
 
 				return transcript;
 			} catch (error) {
-				if (error instanceof ApplicationError) {
-					throw error;
-				} else {
-					throw new ApplicationError(`Failed to extract transcript: ${error.message}`);
-				}
+				// Log the error but don't throw, allow to proceed to get other info
+				console.error(`Failed to extract transcript: ${error.message}`);
+				return null; // Return null if transcript fetching fails
 			}
 		};
 
@@ -106,11 +104,11 @@ export class YoutubeTranscriptNode implements INodeType {
 					}
 				}
 
-				const transcript = await getTranscriptFromYoutube(youtubeId);
+				const transcriptData = await getTranscriptFromYoutube(youtubeId);
 
 				let text = '';
-				if (transcript && Array.isArray(transcript)) {
-					for (const line of transcript) {
+				if (transcriptData && Array.isArray(transcriptData)) {
+					for (const line of transcriptData) {
 						if (line && typeof line.text === 'string') {
 							text += line.text + ' ';
 						}
@@ -119,8 +117,11 @@ export class YoutubeTranscriptNode implements INodeType {
 
 				const output: { [key: string]: any } = {
 					youtubeId: youtubeId,
-					transcript: text.trim(),
 				};
+
+				if (text) {
+					output.transcript = text.trim();
+				}
 
 				if (returnChannelId || returnChannelName || returnTitle) {
 					const youtubei = new YoutubeiClient();
