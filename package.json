@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-bandi-youtube-transcript",
-	"version": "0.3.1",
+	"version": "0.4.0",
 	"description": "유튜브 자막 + 기타 유튜브 정보를 가져오는 n8n 커뮤니티 노드 패키지",
 	"keywords": [
 		"n8n-community-node-package",
@@ -68,7 +68,6 @@
 		"typescript-eslint": "^8.32.1"
 	},
 	"dependencies": {
-		"youtube-transcript": "^1.2.1",
 		"youtubei": "^1.6.7"
 	}
 }

@@ -7,8 +7,7 @@ import {
 	NodeConnectionType,
 	NodeOperationError,
 } from 'n8n-workflow';
-import { YoutubeTranscript } from 'youtube-transcript';
-import { Client as YoutubeiClient } from 'youtubei';
+import { Client as YoutubeiClient, Caption } from 'youtubei';
 
 export class YoutubeTranscriptNode implements INodeType {
 	description: INodeTypeDescription = {
@@ -54,19 +53,6 @@ export class YoutubeTranscriptNode implements INodeType {
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-		const getTranscriptFromYoutube = async function (youtubeId: string) {
-			try {
-				const url = `https://www.youtube.com/watch?v=${youtubeId}`;
-				const transcript = await YoutubeTranscript.fetchTranscript(url);
-
-				return transcript;
-			} catch (error) {
-				// Log the error but don't throw, allow to proceed to get other info
-				console.error(`Failed to extract transcript: ${error.message}`);
-				return null; // Return null if transcript fetching fails
-			}
-		};
-
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
 
@@ -104,14 +90,29 @@ export class YoutubeTranscriptNode implements INodeType {
 					}
 				}
 
-				const transcriptData = await getTranscriptFromYoutube(youtubeId);
+				const youtubei = new YoutubeiClient();
+				const videoInfo = await youtubei.getVideo(youtubeId);
+
+				if (!videoInfo) {
+					throw new NodeOperationError(this.getNode(), 'Failed to retrieve video information', {
+						itemIndex,
+					});
+				}
 
 				let text = '';
-				if (transcriptData && Array.isArray(transcriptData)) {
-					for (const line of transcriptData) {
-						if (line && typeof line.text === 'string') {
-							text += line.text + ' ';
+				if (videoInfo.captions) {
+					try {
+						let captions: Caption[] | undefined = await videoInfo.captions.get('ko');
+						if (!captions || captions.length === 0) {
+							captions = await videoInfo.captions.get('en');
 						}
+
+						if (captions && captions.length > 0) {
+							text = captions.map((caption) => caption.text).join(' ');
+						}
+					} catch (captionError) {
+						console.error(`Failed to extract transcript using youtubei: ${captionError.message}`);
+						// 자막 추출에 실패해도 다른 정보는 계속 진행하도록 오류를 던지지 않음
 					}
 				}
 
@@ -123,18 +124,9 @@ export class YoutubeTranscriptNode implements INodeType {
 					output.transcript = text.trim();
 				}
 
-				if (returnChannelId || returnChannelName || returnTitle) {
-					const youtubei = new YoutubeiClient();
-					const videoInfo = await youtubei.getVideo(youtubeId);
-					if (!videoInfo) {
-						throw new NodeOperationError(this.getNode(), 'Failed to retrieve video information', {
-							itemIndex,
-						});
-					}
-					if (returnChannelId) output.channelId = videoInfo.channel?.id;
-					if (returnChannelName) output.channelName = videoInfo.channel?.name;
-					if (returnTitle) output.title = videoInfo.title;
-				}
+				if (returnChannelId) output.channelId = videoInfo.channel?.id;
+				if (returnChannelName) output.channelName = videoInfo.channel?.name;
+				if (returnTitle) output.title = videoInfo.title;
 
 				returnData.push({
 					json: output,
