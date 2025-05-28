@@ -7,7 +7,7 @@ import {
 	NodeConnectionType,
 	NodeOperationError,
 } from 'n8n-workflow';
-import { Client as YoutubeiClient, Caption } from 'youtubei';
+import { Client as YoutubeiClient, VideoCaptions, Caption } from 'youtubei';
 
 export class YoutubeTranscriptNode implements INodeType {
 	description: INodeTypeDescription = {
@@ -110,8 +110,8 @@ export class YoutubeTranscriptNode implements INodeType {
 						if (captions && captions.length > 0) {
 							text = captions.map((caption) => caption.text).join(' ');
 						}
-					} catch (captionError) {
-						console.error(`Failed to extract transcript using youtubei: ${captionError.message}`);
+					} catch (captionError: any) {
+						console.error(`[Youtubei] Failed to extract transcript: ${captionError.message}`);
 						// 자막 추출에 실패해도 다른 정보는 계속 진행하도록 오류를 던지지 않음
 					}
 				}
