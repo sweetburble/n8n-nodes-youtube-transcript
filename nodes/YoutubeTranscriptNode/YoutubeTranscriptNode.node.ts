@@ -7,7 +7,7 @@ import {
 	NodeConnectionType,
 	NodeOperationError,
 } from 'n8n-workflow';
-import { Client as YoutubeiClient, Caption } from 'youtubei';
+import { Caption, Client } from 'youtubei';
 
 export class YoutubeTranscriptNode implements INodeType {
 	description: INodeTypeDescription = {
@@ -90,8 +90,8 @@ export class YoutubeTranscriptNode implements INodeType {
 					}
 				}
 
-				const youtubei = new YoutubeiClient();
-				const videoInfo = await youtubei.getVideo(youtubeId);
+				const youtube = new Client();
+				const videoInfo = await youtube.getVideo(youtubeId);
 
 				if (!videoInfo) {
 					throw new NodeOperationError(this.getNode(), 'Failed to retrieve video information', {
