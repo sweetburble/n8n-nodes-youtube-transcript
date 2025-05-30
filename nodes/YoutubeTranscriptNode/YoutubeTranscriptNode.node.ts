@@ -124,10 +124,12 @@ export class YoutubeTranscriptNode implements INodeType {
 					let cleanedTranscript = text.trim();
 					// 1. 연속된 공백을 하나의 공백으로 변경
 					cleanedTranscript = cleanedTranscript.replace(/\s+/g, ' ');
-					// 2. 쉼표 뒤에 공백 추가 및 불필요한 쉼표 정리 (쉼표와 다음 단어 사이 공백, 쉼표 앞뒤 공백 제거)
-					cleanedTranscript = cleanedTranscript.replace(/ ?, ?/g, ', ');
+					// 2. 모든 쉼표 제거
+					cleanedTranscript = cleanedTranscript.replace(/,/g, '');
 					// 3. 줄 바꿈 문자를 공백으로 변경
 					cleanedTranscript = cleanedTranscript.replace(/\n/g, ' ');
+					// 4. 다시 한번 연속된 공백을 하나의 공백으로 변경 (쉼표 제거 후 생길 수 있는 이중 공백 처리)
+					cleanedTranscript = cleanedTranscript.replace(/\s+/g, ' ');
 					output.transcript = cleanedTranscript;
 				}
 
