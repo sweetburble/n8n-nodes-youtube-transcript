@@ -32,6 +32,13 @@ export class YoutubeTranscriptNode implements INodeType {
 				placeholder: 'Youtube Video ID or Url',
 			},
 			{
+				displayName: 'Preferred Caption Language',
+				name: 'preferCapLang',
+				type: 'string',
+				default: 'en',
+				placeholder: 'en, ko, jp...',
+			},
+			{
 				displayName: 'Return Channel ID',
 				name: 'returnChannelId',
 				type: 'boolean',
@@ -59,6 +66,7 @@ export class YoutubeTranscriptNode implements INodeType {
 		for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
 			try {
 				const youtubeIdOrUrl = this.getNodeParameter('youtubeId', itemIndex, '') as string;
+				const preferCapLang = this.getNodeParameter('preferCapLang', itemIndex, 'en') as string;
 				const returnChannelId = this.getNodeParameter(
 					'returnChannelId',
 					itemIndex,
@@ -99,19 +107,41 @@ export class YoutubeTranscriptNode implements INodeType {
 					});
 				}
 
+				// 동영상에서 사용할 수 있는 자막 언어 리스트
+				const availableCaptionLanguages = videoInfo.captions?.languages;
+
 				let text = '';
-				if (videoInfo.captions) {
+				if (
+					videoInfo.captions &&
+					availableCaptionLanguages &&
+					availableCaptionLanguages.length > 0
+				) {
 					try {
-						let captions: Caption[] | undefined = await videoInfo.captions.get('ko');
-						if (!captions || captions.length === 0) {
-							captions = await videoInfo.captions.get('en');
+						let targetLangCode: string | undefined = undefined;
+
+						// 1. preferCapLang 확인
+						if (availableCaptionLanguages.some((lang) => lang.code === preferCapLang)) {
+							targetLangCode = preferCapLang;
+						}
+						// 2. 영어 자막 확인
+						else if (availableCaptionLanguages.some((lang) => lang.code === 'en')) {
+							targetLangCode = 'en';
+						}
+						// 3. 사용 가능한 첫 번째 자막 사용
+						else {
+							targetLangCode = availableCaptionLanguages[0].code;
 						}
 
-						if (captions && captions.length > 0) {
-							text = captions.map((caption) => caption.text).join(' ');
+						if (targetLangCode) {
+							const captions: Caption[] | undefined = await videoInfo.captions.get(targetLangCode);
+							if (captions && captions.length > 0) {
+								text = captions.map((caption) => caption.text).join(' ');
+							}
 						}
 					} catch (captionError: any) {
-						console.error(`[Youtubei] Failed to extract transcript: ${captionError.message}`);
+						console.error(
+							`[Youtubei] Failed to extract transcript for language: ${captionError.message}`,
+						);
 						// 자막 추출에 실패해도 다른 정보는 계속 진행하도록 오류를 던지지 않음
 					}
 				}
