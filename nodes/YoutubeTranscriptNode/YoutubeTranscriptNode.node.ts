@@ -121,7 +121,14 @@ export class YoutubeTranscriptNode implements INodeType {
 				};
 
 				if (text) {
-					output.transcript = text.trim();
+					let cleanedTranscript = text.trim();
+					// 1. 연속된 공백을 하나의 공백으로 변경
+					cleanedTranscript = cleanedTranscript.replace(/\s+/g, ' ');
+					// 2. 쉼표 뒤에 공백 추가 및 불필요한 쉼표 정리 (쉼표와 다음 단어 사이 공백, 쉼표 앞뒤 공백 제거)
+					cleanedTranscript = cleanedTranscript.replace(/ ?, ?/g, ', ');
+					// 3. 줄 바꿈 문자를 공백으로 변경
+					cleanedTranscript = cleanedTranscript.replace(/\n/g, ' ');
+					output.transcript = cleanedTranscript;
 				}
 
 				if (returnChannelId) output.channelId = videoInfo.channel?.id;
