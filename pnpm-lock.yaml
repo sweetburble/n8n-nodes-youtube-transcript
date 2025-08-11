@@ -8,12 +8,9 @@ importers:
 
   .:
     dependencies:
-      youtube-transcript:
-        specifier: ^1.2.1
-        version: 1.2.1
       youtubei:
-        specifier: ^1.6.7
-        version: 1.6.7
+        specifier: ^1.7.0
+        version: 1.7.0
     devDependencies:
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.32.1
@@ -4216,12 +4213,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  youtube-transcript@1.2.1:
-    resolution: {integrity: sha512-TvEGkBaajKw+B6y91ziLuBLsa5cawgowou+Bk0ciGpjELDfAzSzTGXaZmeSSkUeknCPpEr/WGApOHDwV7V+Y9Q==}
-    engines: {node: '>=18.0.0'}
-
-  youtubei@1.6.7:
-    resolution: {integrity: sha512-J3Q4dSspZkIf7StlFt1muJdaURjfSGCUZsQp9rbU13temXn1hA7JO0Ep8g9qnz222kUg8SyPINyoKECFG3j/+g==}
+  youtubei@1.7.0:
+    resolution: {integrity: sha512-iL7TQYf6C/Abr3jLHUBhB9jLhdQLlVTGUdo3+NrYvLxpl+SliRd4hV8YpBkOEHOYMaBBmnFnnVMMs/ootjOOmg==}
 
   yup@0.32.11:
     resolution: {integrity: sha512-Z2Fe1bn+eLstG8DRR6FTavGD+MeAwyfmouhHsIUgaADz8jvFKbO/fXc2trJKZg+5EBjh4gGm3iU/t3onKlXHIg==}
@@ -9843,9 +9836,7 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  youtube-transcript@1.2.1: {}
-
-  youtubei@1.6.7:
+  youtubei@1.7.0:
     dependencies:
       node-fetch: 2.6.7
       protobufjs: 7.2.6
