@@ -18,7 +18,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/sweetburble/n8n-nodes-youtube-transcript.git"
+		"url": "git+https://github.com/sweetburble/n8n-nodes-youtube-transcript.git"
 	},
 	"main": "index.js",
 	"engines": {
@@ -32,7 +32,7 @@
 		"format": "prettier nodes credentials --write",
 		"lint": "eslint --no-error-on-unmatched-pattern nodes credentials package.json",
 		"lintfix": "eslint nodes credentials package.json --fix",
-		"prepublishOnly": "pnpm build && pnpm lint -c .eslintrc.prepublish.js nodes credentials package.json"
+		"prepublishOnly": "pnpm build && pnpm lint -c .eslintrc.prepublish.js nodes credentials"
 	},
 	"files": [
 		"dist"
